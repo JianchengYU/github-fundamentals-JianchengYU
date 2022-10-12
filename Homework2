@@ -1,14 +1,11 @@
-HW2- California fires count.sh
 #!/bin/bash
 
 # Create a new directory for analysis.
 mkdir CAFire
 cd CAFire
 
-# Download the dataset and give a new name.
-curl -o https://gis.data.cnra.ca.gov/datasets/CALFIRE-Forestry::recent-large-fire-perimeters-5000-acres.csv    >>  CAFire.csv -s
-
-curl -o https://gis.data.cnra.ca.gov/datasets/CALFIRE-Forestry::recent-large-fire-perimeters-5000-acres.csv   >  CAFire.csv -s
+# Download the dataset and give it a new name
+curl  https://gis.data.cnra.ca.gov/datasets/CALFIRE-Forestry::recent-large-fire-perimeters-5000-acres.csv  > CAFire.csv
 
 # Print out the range of years that occur in this file.
 cut -d, -f2 CAFire.csv | sort | uniq
@@ -19,23 +16,20 @@ nano CAFire.csv
 
 # Print out the range of years to confirm the correction.
 sed 1d CAFire.csv > CAFire2.csv
-cut -d, -f2 CAFire2 | sort | uniq 
-YearRange=( $(sort CAFire2.csv | cut -f2 -d',') ) 
-echo "The range of years is ${YearRange[0]} and ${YearRange[${#YearRange[@]}-1]}"
-
+echo "The range of years is $(cut -f2 -d"," CAFire2.csv | sort -n | head -1 ) and $(cut -f2 -d"," CAFire2.csv | sort -n | tail -1)"
+	
 # Print out the number of fires in the database
 echo "The number of Fires is $( wc -l  < CAFire2.csv )."
 
 # Print out the number of fires that occur each year
 echo "The number of fires each year:
+Number Year
 $(awk -F, '{print $2}' CAFire.csv | sort -n | uniq -c | tail -n +2)"
 
 # Print out the name and year of largest fire
 echo "The largest fire
 GIS_ACRES Fire_Name Year
 $(awk -v FS="," -v OFS="," '{print $13,$6,$2}' CAFire.csv | sort -nr | head -1)"
-
-
 
 # Print out the total acreage burned in each year
 cut -d, -f2 CAFire2.csv | sort | uniq > ArchYear.txt
